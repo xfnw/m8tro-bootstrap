@@ -47,38 +47,10 @@ var LessPluginAutoPrefix = require('less-plugin-autoprefix'),
     autoprefix = new LessPluginAutoPrefix({ browsers: autoprefixerBrowsers });
 
 
-/*
- * Task combos
- */
-gulp.task('html',    ['htmlval']);
-gulp.task('build',   ['setup']);
-gulp.task('custom',  ['setup']);
-gulp.task('prefs',   ['setup']);
-gulp.task('clear',   ['clean']);
-gulp.task('empty',   ['clean']);
-gulp.task('flush',   ['clean']);
-gulp.task('trash',   ['clean']);
-
-gulp.task('default',  ['help']);
-gulp.task('selftest', ['jshint', 'jsonlint']);
-
-gulp.task('lint',    ['html', 'selftest']);
-
 
 /*
  * Sub-tasks
  */
-gulp.task('make', function(callback) {
-
- console.log('\nBuilding M8tro theme:');
- sequence(
-     ['fa_css', 'fa_fonts'],
-     'bootstrapjs',
-     'less',
-     callback
-   );
-});
-
 
  // Lint JS files
 gulp.task('jshint', function() {
@@ -152,7 +124,7 @@ gulp.task('less', function () {
 // Copy tasks
 gulp.task('fa_css', function() {
   
-  gulp.src('node_packages/font-awesome/css/font-awesome.min.css')
+  gulp.src('node_modules/font-awesome/css/font-awesome.min.css')
   .pipe(debug({title: 'copy:'}))
   .pipe(gulp.dest(__dirname+'/dist/css/'));
 });
@@ -161,7 +133,7 @@ gulp.task('fa_css', function() {
 gulp.task('fa_fonts', function() {
 
   gulp.src([
-    'node_packages/font-awesome/fonts/fontawesome-webfont.*'
+    'node_modules/font-awesome/fonts/fontawesome-webfont.*'
   ])
   .pipe(debug({title: 'copy:'}))
   .pipe(gulp.dest(__dirname+'/dist/fonts/'));
@@ -170,13 +142,13 @@ gulp.task('fa_fonts', function() {
 
 gulp.task('bootstrapjs', function() {
   gulp.src([
-      'node_packages/bootstrap/dist/js/bootstrap.min.js'
+      'node_modules/bootstrap/dist/js/bootstrap.min.js'
     ])
     .pipe(debug({title: 'copy:'}))
     .pipe(gulp.dest('dist/js/'));
 
   gulp.src([
-      'node_packages/jquery/dist/jquery.min.js'
+      'node_modules/jquery/dist/jquery.min.js'
     ])
     .pipe(debug({title: 'copy:'}))
     .pipe(gulp.dest('dist/js/'));
@@ -232,7 +204,7 @@ gulp.task('setup', function(){
    { name: 'Carousel\n', checked: false },
   ],
 
-  _dir   = 'node_packages/bootstrap/',
+  _dir   = 'node_modules/bootstrap/',
   _fonts = [],
   _js    = [], 
   _less  = [
@@ -396,7 +368,7 @@ gulp.task('setup', function(){
             }
             if (res.components.indexOf('Tooltips')  > -1 ) {
               console.log('+tooltips.less');
-              _less.push(_dir+'less/tooltips.less');
+              _less.push(_dir+'less/tooltip.less');
               console.log('+tooltip.js');
               _js.push(_dir+'js/tooltip.js');
             }
@@ -477,9 +449,10 @@ gulp.task('watch', function () {
          ['lint']);
 });
 
+gulp.task('make', gulp.series('fa_css','fa_fonts','bootstrapjs','less'));
 
 // Help dialog
-gulp.task('help', function() {
+gulp.task('help', function(resolve) {
 
   var title_length =  meta.name + ' v' + meta.version;
 
@@ -492,4 +465,25 @@ gulp.task('help', function() {
   console.log('         make - build M8tro Bootstrap theme');
   console.log('        setup - customize & build M8tro Bootstrap theme');
 
+  resolve();
 } );
+
+
+/*
+ * Task combos
+ */
+gulp.task('html',    gulp.series('htmlval'));
+gulp.task('build',   gulp.series('setup'));
+gulp.task('custom',  gulp.series('setup'));
+gulp.task('prefs',   gulp.series('setup'));
+gulp.task('clear',   gulp.series('clean'));
+gulp.task('empty',   gulp.series('clean'));
+gulp.task('flush',   gulp.series('clean'));
+gulp.task('trash',   gulp.series('clean'));
+
+gulp.task('default',  gulp.series('help'));
+gulp.task('selftest', gulp.series('jshint', 'jsonlint'));
+
+gulp.task('lint',    gulp.series('html', 'selftest'));
+
+
